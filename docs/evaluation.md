@@ -42,6 +42,32 @@ An issue counts as closed only when its owner has accepted it: merged, deployed 
 - **Show the change.** Put each metric beside its target and its value in the previous window. A number with no comparison does not tell anyone what to do.
 - **Keep the targets fixed while you measure.** Change a target in its own reviewed change, so a run that missed it cannot be quietly redefined as a pass.
 
+## With the bundled tool
+
+[tools/role-metrics.mjs](../tools/role-metrics.mjs) computes the run metrics above, except red-main spans and subscription coverage, which come from the code host rather than from runs. It needs Bun or Node 22 and no packages:
+
+```sh
+bun tools/role-metrics.mjs runs.jsonl --from 2026-11-01 --to 2026-11-03 --zone America/Los_Angeles
+```
+
+It prints one Markdown table per role. Each table shows this window, the window of the same length just before it, the target, and whether the target was met. `--json` prints the same numbers as JSON. A line it cannot read stops the run with its line number, so no run is dropped silently.
+
+The input has one JSON object per run, extracted from the scheduler's records:
+
+| Field             | Required | Meaning                                                                                     |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `role`            | yes      | The role the run belongs to                                                                 |
+| `trigger`         | yes      | `schedule`, `agent`, `person` or `event`                                                    |
+| `startedAt`       | yes      | ISO 8601 time the run started; decides which window it counts in                            |
+| `dueAt`           | no       | ISO 8601 time the run was due; gives the queue wait                                         |
+| `model`           | no       | Model the run used, with its effort if the role sets one, such as `model-name/high`         |
+| `configuredModel` | no       | Model the role is configured for, in the same form; a run with both fields counts for drift |
+| `readingBytes`    | no       | Bytes of instructions, rules and state read before acting                                   |
+| `reportChars`     | no       | Characters in the report the run left for people                                            |
+| `rescued`         | no       | `true` when a person had to redo, undo or unblock the run's work                            |
+
+A metric whose fields are missing from every run shows "no data" instead of a number.
+
 ## Reading the results
 
 - A role with no human rescues and outcomes that keep improving is working, even if its run metrics look untidy.

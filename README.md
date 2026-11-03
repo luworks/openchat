@@ -21,11 +21,12 @@ Coding agents already finish single tasks with little supervision. The limit has
 
 ## Contents
 
-| Path                                                 | What it is                                                                             |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| [docs/evaluation.md](docs/evaluation.md)             | How to tell whether an agent role is working: metrics, targets and how to compute them |
-| [templates/role-prompt.md](templates/role-prompt.md) | A skeleton for the standing prompt of one role                                         |
-| [CHANGELOG.md](CHANGELOG.md)                         | One entry per published snapshot                                                       |
+| Path                                                 | What it is                                                                              |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [docs/evaluation.md](docs/evaluation.md)             | How to tell whether an agent role is working: metrics, targets and how to compute them  |
+| [templates/role-prompt.md](templates/role-prompt.md) | A skeleton for the standing prompt of one role                                          |
+| [tools/role-metrics.mjs](tools/role-metrics.mjs)     | Computes those metrics per role from a JSON Lines file of runs; tests in [test/](test/) |
+| [CHANGELOG.md](CHANGELOG.md)                         | What changed, by snapshot date                                                          |
 
 ## Publishing
 
