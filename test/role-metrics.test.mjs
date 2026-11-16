@@ -1,4 +1,3 @@
-// Run with `node --test test/` from the repository root.
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -6,7 +5,6 @@ import { join } from "node:path";
 import test from "node:test";
 import { computeReport, parseRuns, percentile, renderMarkdown, run, windows } from "../tools/role-metrics.mjs";
 
-// 2026-11-01 is the day daylight saving time ends in America/Los_Angeles: it starts at 07:00Z, and 2026-11-03 at 08:00Z.
 const window = { from: "2026-11-01", to: "2026-11-02", zone: "America/Los_Angeles" };
 const runs = [
   {

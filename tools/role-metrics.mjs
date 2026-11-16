@@ -1,10 +1,4 @@
 #!/usr/bin/env bun
-// Computes the run metrics from docs/evaluation.md for each role, over whole days in a named time zone.
-// Every metric is shown beside its value in the window of equal length just before, and beside its target.
-// It runs under Bun or Node 22 and needs no packages. The input format is in docs/evaluation.md.
-//
-//   bun tools/role-metrics.mjs runs.jsonl --from 2026-11-01 --to 2026-11-03 --zone America/Los_Angeles
-//   node tools/role-metrics.mjs runs.jsonl --from 2026-11-01 --to 2026-11-03 --zone UTC --json
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -39,7 +33,6 @@ function parseLine(line, where) {
   }
 }
 
-/** Parses JSON Lines into runs. A bad line fails with its line number and field name, so no run is dropped silently. */
 export function parseRuns(text, source = "input") {
   return text.split("\n").flatMap((line, index) => {
     if (!line.trim()) return [];
@@ -52,7 +45,6 @@ export function parseRuns(text, source = "input") {
 }
 
 function checkZone(zone) {
-  // A fixed offset such as +08:00 is wrong for half the year wherever daylight saving applies.
   if (zone !== "UTC" && !/^[A-Za-z]+(?:\/[\w+-]+)+$/u.test(zone))
     throw new Error(`--zone must be an IANA zone such as America/Los_Angeles`);
   try {
@@ -84,13 +76,11 @@ function zoneOffset(instant, zone) {
   return Date.UTC(part.year, part.month - 1, part.day, part.hour, part.minute, part.second) - instant;
 }
 
-/** Epoch milliseconds at which `date` begins in `zone`; the second pass corrects for an offset change near midnight. */
 function startOfDay(date, zone) {
   const midnight = Date.parse(date);
   return midnight - zoneOffset(midnight - zoneOffset(midnight, zone), zone);
 }
 
-/** The requested window and the window of equal length just before it, as half-open epoch-millisecond ranges. */
 export function windows(from, to, zone) {
   checkZone(zone);
   checkDate(from, "from");
@@ -101,7 +91,6 @@ export function windows(from, to, zone) {
   return { current: span(from, to), previous: span(shiftDate(from, -days), shiftDate(from, -1)) };
 }
 
-/** Nearest-rank percentile: the smallest value with at least `p` percent of values at or below it. */
 export function percentile(values, p) {
   if (!values.length) return undefined;
   const sorted = [...values].sort((a, b) => a - b);
@@ -131,7 +120,6 @@ function summarize(runs) {
   };
 }
 
-/** Groups runs by role and summarizes each role in the requested window and the one before it. */
 export function computeReport(runs, { from, to, zone }) {
   const { current, previous } = windows(from, to, zone);
   const inside = (span) => (run) => Date.parse(run.startedAt) >= span.start && Date.parse(run.startedAt) < span.end;
@@ -199,7 +187,6 @@ const rows = [
 
 const verdict = (met) => (met === undefined ? "" : met ? "yes" : "**no**");
 
-/** Renders the report as Markdown: one table per role, with the verdict taken from the requested window. */
 export function renderMarkdown(report) {
   const lines = [
     `# Role metrics, ${report.current.from} to ${report.current.to} (${report.zone})`,
@@ -215,7 +202,6 @@ export function renderMarkdown(report) {
   return lines.join("\n");
 }
 
-/** Runs the command line and returns what it prints. */
 export function run(argv) {
   const options = { from: { type: "string" }, to: { type: "string" }, zone: { type: "string" }, json: { type: "boolean" } };
   const { values, positionals } = parseArgs({ args: argv, allowPositionals: true, options });
